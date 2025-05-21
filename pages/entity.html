@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Command</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #0f0;
+      font-family: monospace;
+      padding: 40px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      background-color: #222;
+      color: #0f0;
+      border: 1px solid #0f0;
+    }
+    #message {
+      margin-top: 20px;
+      font-size: 20px;
+      color: red;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>command</h1>
+  <p>command:</p>
+  
+  <input type="text" id="command" placeholder="/summon minecraft:entity303" onkeydown="checkEnter(event)">
+  
+  <div id="message"></div>
+
+  <script>
+    function checkEnter(e) {
+      if (e.key === "Enter") {
+        const input = document.getElementById("command").value.trim();
+        const message = document.getElementById("message");
+
+        if (input === "/summon minecraft:entity303") {
+          message.textContent = "Object successfully summoned";
+        } else if (input === "/help") {
+          message.textContent = "/summon minecraft:entity303";
+        } else {
+          message.textContent = "Unknown command. Try /help for a list of command";
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
