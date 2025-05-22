@@ -1,1 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Minecraft Painting Command</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      background-color: #f0f0f0;
+    }
+
+    #painting {
+      display: none;
+      margin-top: 30px;
+      max-width: 90%;
+      height: auto;
+      border: 4px solid #333;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    #message {
+      display: none;
+      margin-top: 20px;
+      font-size: 24px;
+      color: #d12f2f;
+      font-weight: bold;
+      animation: fadeIn 2s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Minecraft command</h1>
+  <input type="text" id="commandInput" placeholder="/give @s minecraft:painting を入力" />
+  <button onclick="checkCommand()">enter</button>
+
+  <div id="imageContainer">
+    <img id="painting" src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/minecraft-painting-the-wanderer-canvas-print-tyler-bailey.jpg" alt="The Wanderer Painting">
+  </div>
+
+  <div id="message">This feels like a Rickroll.</div>
+
+  <script>
+    function checkCommand() {
+      const input = document.getElementById("commandInput").value.trim();
+      const painting = document.getElementById("painting");
+      const message = document.getElementById("message");
+
+      if (input === "/give @s minecraft:painting") {
+        painting.style.display = "block";
+        message.style.display = "none"; // メッセージを一旦非表示
+
+        // 1.5秒後にRickrollメッセージを表示
+        setTimeout(() => {
+          message.style.display = "block";
+        }, 1500);
+      } else {
+        alert("コマンドが間違ってるみたい！ちゃんと入力してね！");
+        painting.style.display = "none";
+        message.style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>
 
