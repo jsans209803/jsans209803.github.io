@@ -60,14 +60,17 @@
 
       if (input === "/give @s minecraft:painting") {
         painting.style.display = "block";
-        message.style.display = "none"; // メッセージを一旦非表示
+        message.style.display = "none";
 
-        // 1.5秒後にRickrollメッセージを表示
         setTimeout(() => {
           message.style.display = "block";
         }, 1500);
+      } else if (input === "/help") {
+        alert("command:\n/give @s minecraft:painting");
+        painting.style.display = "none";
+        message.style.display = "none";
       } else {
-        alert("Unknown command. Try /help for a list of command");
+        alert("Unknown command. Try /help for a list of commands.");
         painting.style.display = "none";
         message.style.display = "none";
       }
