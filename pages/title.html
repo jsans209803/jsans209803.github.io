@@ -1,1 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Minecraft Title Command</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background-color: #111;
+      color: white;
+    }
 
+    /* Display area for the title message */
+    #titleDisplay {
+      display: none;
+      font-size: 48px;
+      font-weight: bold;
+      margin-top: 50px;
+      animation: fadeInZoom 1.5s ease-out forwards;
+    }
+
+    /* Animation effect for the title message */
+    @keyframes fadeInZoom {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Styling for the input field */
+    input {
+      width: 80%;
+      max-width: 500px;
+      padding: 10px;
+      font-size: 18px;
+    }
+
+    /* Styling for the enter button */
+    button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Minecraft title command</h1>
+
+  <!-- Input for command entry -->
+  <input type="text" id="commandInput" placeholder='/title @s title "Your message"' />
+  <button onclick="runTitleCommand()">enter</button>
+
+  <!-- Where the title will appear -->
+  <div id="titleDisplay"></div>
+
+  <script>
+    function runTitleCommand() {
+      const input = document.getElementById("commandInput").value.trim();
+      const titleDisplay = document.getElementById("titleDisplay");
+
+      // Command should match: /title @s title "your text"
+      const regex = /^\/title\s+@s\s+title\s+"(.+)"$/;
+
+      // If the user types /help, show the help command
+      if (input === "/help") {
+        alert("command:\n/title @s title \"anything\"");
+        titleDisplay.style.display = "none";
+
+      // If command matches the title pattern, extract and display the message
+      } else if (regex.test(input)) {
+        const message = input.match(regex)[1];
+        titleDisplay.textContent = message;
+        titleDisplay.style.display = "block";
+
+      // If command is invalid, show an error message
+      } else {
+        alert("Unknown command. Try /help for a list of commands.");
+        titleDisplay.style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>
