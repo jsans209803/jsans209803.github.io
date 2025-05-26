@@ -105,6 +105,7 @@
     <section class="section">
       <button id="meme-btn">？</button>
       <img id="meme-img" src="https://media.tenor.com/FtJdXh1mP2sAAAAC/stickbug.gif" alt="Stick Bugged">
+      <audio id="meme-audio" src="https://cdn.pixabay.com/download/audio/2021/09/01/audio_b19c5e4500.mp3?filename=got-stickbugged-lol-100571.mp3"></audio>
     </section>
   </main>
 
@@ -116,9 +117,12 @@
   <script>
     const btn = document.getElementById('meme-btn');
     const img = document.getElementById('meme-img');
+    const audio = document.getElementById('meme-audio');
 
     btn.addEventListener('click', () => {
       img.style.display = 'block';
+      audio.currentTime = 0; // 最初から再生
+      audio.play();
     });
   </script>
 
