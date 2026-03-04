@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Block Crafter</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body{
+  margin:0;
+  font-family:sans-serif;
+  color:white;
+  text-align:center;
+  background:url("https://static.planetminecraft.com/files/image/minecraft/data-pack/2023/871/17345525_xl.webp");
+  background-size:cover;
+  background-attachment:fixed;
+  overflow-x:hidden;
+}
+
+button{
+  width:90%;
+  max-width:400px;
+  padding:14px;
+  margin:6px auto;
+  font-size:16px;
+  border:none;
+  border-radius:10px;
+  display:block;
+}
+
+#blockImage{
+  width:55vw;
+  max-width:220px;
+  transition:transform 0.08s;
+}
+
+#blockImage:active{
+  transform:scale(1.1);
+}
+
+#dragonImage{
+  width:70vw;
+  max-width:260px;
+  transition:transform 0.08s;
+}
+
+#dragonImage:active{
+  transform:scale(1.05);
+}
+
+.progressBar{
+  width:90%;
+  height:18px;
+  background:#333;
+  margin:8px auto;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.progressFill{
+  height:100%;
+  width:0%;
+}
+
+.red{background:red;}
+.green{background:lime;}
+
+#deathScreen{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:black;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+
+#deathScreen img{
+  width:90%;
+}
+
+</style>
+</head>
+<body>
+
+<div id="deathScreen">
+  <img src="https://static.wikia.nocookie.net/minecraft_ja_gamepedia/images/5/53/Hardcore_Death.png/revision/latest?cb=20200707195304">
+</div>
+
+<h2 id="toolName"></h2>
+
+<div id="materials"></div>
+
+<img id="blockImage">
+
+<p>Progress: <span id="progress">0</span></p>
+
+<h3>Resources</h3>
+<div id="resourceDisplay"></div>
+
+<h3>Craft</h3>
+<div id="crafting"></div>
+
+<button onclick="craftVoid()">Craft Void Crystal (Iron x20)</button>
+<p>Void Crystals: <span id="voidCount">0</span></p>
+<button id="openGateBtn" style="display:none;" onclick="openGate()">Open Void Gate</button>
+
+<div id="dragonArea" style="display:none;">
+  <h2>Void Dragon</h2>
+  <img id="dragonImage" src="https://minecraft.wiki/images/thumb/Ender_Dragon.gif/250px-Ender_Dragon.gif?fb9ba">
+
+  <p>Dragon HP</p>
+  <div class="progressBar">
+    <div class="progressFill red" id="dragonHP"></div>
+  </div>
+
+  <p>Your HP</p>
+  <div class="progressBar">
+    <div class="progressFill green" id="playerHP"></div>
+  </div>
+
+  <p id="dragonText"></p>
+</div>
+
+<script>
+
+// ===== データ =====
+const toolData={
+  0:{name:"None",damage:0},
+  1:{name:"Wooden Tool",damage:3},
+  2:{name:"Stone Tool",damage:6},
+  3:{name:"Iron Tool",damage:9},
+  4:{name:"Crystal Tool",damage:12},
+  5:{name:"Ancient Tool",damage:15}
+};
+
+const toolCost=[
+  {level:1,cost:{wood:10}},
+  {level:2,cost:{stone:10}},
+  {level:3,cost:{iron:15}},
+  {level:4,cost:{crystal:20}},
+  {level:5,cost:{ancient:10}}
+];
+
+const imageLinks={
+  wood:"https://minecraft.wiki/images/Oak_Log_%28UD%29_JE8_BE3.png?8a080",
+  stone:"https://minecraft.wiki/images/Cobblestone_JE5_BE3.png?29624",
+  iron:"https://minecraft.wiki/images/Iron_Ore_JE6_BE4.png?b1fb3",
+  crystal:"https://minecraft.wiki/images/Diamond_Ore_JE5_BE5.png?fa2f4",
+  ancient:"https://minecraft.wiki/images/Ancient_Debris_JE1_BE1.png?571c1"
+};
+
+let resources={wood:0,stone:0,iron:0,crystal:0,ancient:0};
+let voidCrystals=0;
+let toolLevel=0;
+let selectedMaterial="wood";
+let miningProgress=0;
+
+const materialsData={
+  wood:{required:0,clicks:5},
+  stone:{required:1,clicks:5},
+  iron:{required:2,clicks:5},
+  crystal:{required:3,clicks:5},
+  ancient:{required:4,clicks:10}
+};
+
+// ===== 戦闘 =====
+let dragonHP=200;
+let playerHP=20;
+let dragonInterval=null;
+
+function getAttack(){ return toolData[toolLevel].damage; }
+function getDefense(){ return toolLevel*0.05; }
+
+function startDragonAttack(){
+  dragonInterval=setInterval(()=>{
+    if(dragonHP<=0||playerHP<=0) return;
+    let dmg=Math.floor(2*(1-getDefense()));
+    playerHP=Math.max(0,playerHP-dmg);
+    updateBars();
+    if(playerHP<=0){
+      document.getElementById("deathScreen").style.display="flex";
+      clearInterval(dragonInterval);
+    }
+  },1000);
+}
+
+function updateBars(){
+  document.getElementById("dragonHP").style.width=(dragonHP/200*100)+"%";
+  document.getElementById("playerHP").style.width=(playerHP/20*100)+"%";
+}
+
+// ===== 採掘 =====
+document.getElementById("blockImage").addEventListener("click",()=>{
+  let data=materialsData[selectedMaterial];
+  if(toolLevel<data.required) return;
+  miningProgress++;
+  if(miningProgress>=data.clicks){
+    resources[selectedMaterial]++;
+    miningProgress=0;
+  }
+  updateUI();
+});
+
+// ===== ドラゴン攻撃 =====
+document.getElementById("dragonImage").addEventListener("click",()=>{
+  if(dragonHP<=0||playerHP<=0) return;
+  dragonHP=Math.max(0,dragonHP-getAttack());
+  updateBars();
+  if(dragonHP<=0){
+    document.getElementById("dragonText").innerText="VICTORY!";
+    clearInterval(dragonInterval);
+  }
+});
+
+// ===== UI =====
+function updateUI(){
+  document.getElementById("toolName").innerText="Current Tool: "+toolData[toolLevel].name;
+  document.getElementById("progress").innerText=miningProgress;
+  document.getElementById("voidCount").innerText=voidCrystals;
+
+  let display="";
+  for(let r in resources){ display+=r+": "+resources[r]+"<br>"; }
+  document.getElementById("resourceDisplay").innerHTML=display;
+
+  if(voidCrystals>=4){
+    document.getElementById("openGateBtn").style.display="block";
+  }
+}
+
+function openGate(){
+  if(voidCrystals<4) return;
+  voidCrystals-=4;
+  document.getElementById("dragonArea").style.display="block";
+  updateUI();
+  updateBars();
+  startDragonAttack();
+}
+
+function craftVoid(){
+  if(toolLevel<3||resources.iron<20) return;
+  resources.iron-=20;
+  voidCrystals++;
+  updateUI();
+}
+
+function createMaterialButtons(){
+  const container=document.getElementById("materials");
+  for(let mat in materialsData){
+    let btn=document.createElement("button");
+    btn.innerText=mat;
+    btn.onclick=()=>{
+      selectedMaterial=mat;
+      document.getElementById("blockImage").src=imageLinks[mat];
+      miningProgress=0;
+      updateUI();
+    };
+    container.appendChild(btn);
+  }
+}
+
+function createCraftButtons(){
+  const container=document.getElementById("crafting");
+  toolCost.forEach(t=>{
+    let btn=document.createElement("button");
+    let costText=Object.entries(t.cost).map(x=>x[1]+" "+x[0]).join(" + ");
+    btn.innerText=`Craft ${toolData[t.level].name} (${costText}) — DMG:${toolData[t.level].damage}`;
+    btn.onclick=()=>{
+      for(let c in t.cost){
+        if(resources[c]<t.cost[c]) return;
+      }
+      for(let c in t.cost){ resources[c]-=t.cost[c]; }
+      toolLevel=t.level;
+      updateUI();
+    };
+    container.appendChild(btn);
+  });
+}
+
+document.getElementById("deathScreen").onclick=()=>location.reload();
+
+createMaterialButtons();
+createCraftButtons();
+document.getElementById("blockImage").src=imageLinks["wood"];
+updateUI();
+
+</script>
+</body>
+</html>
